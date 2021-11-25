@@ -29,6 +29,37 @@ glm::vec3 ray_color(Ray& r) {
 //   return image;
 // }
 
+Ray* rayThruPixel(Camera* cam, int i, int j, int width, int height){
+  glm::vec3 w = glm::normalize(cam->eye - cam->target);
+  glm::vec3 u = glm::normalize(glm::cross(cam->up, w));
+  glm::vec3 v = glm::cross(w, u);
+
+  float x = 2 * (i + 0.5) / width - 1;
+  float y = 1 - 2 * (j + 0.5) / height;
+
+  glm::vec3 pos = cam->eye;
+  glm::vec3 dir = glm::normalize(x * u + y * v - w);
+
+  Ray* ray = new Ray(pos, dir);
+
+  return ray;
+}
+
+// Checks whether a ray would interset with a triangle in front of camera
+bool IntersectTriag(Ray* ray, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3){
+  // TODO: there is still something wrong with the view/transformation
+
+  glm::mat4 A = glm::mat4(p1[0], p1[1], p1[2], 1, 
+                          p2[0], p2[1], p2[2], 1, 
+                          p3[0], p3[1], p3[2], 1,
+                          -ray->dir[0], -ray->dir[1], -ray->dir[2], 0);
+  glm::vec4 b = glm::vec4(ray->ori, 1);
+
+  glm::vec4 x = glm::inverse(A) * b;
+
+  return (x[0] >= 0 &&  x[1] >= 0 && x[2] >= 0 && x[3] >= 0);
+}
+
 int main() {
 
   // Image
@@ -38,7 +69,7 @@ int main() {
 
   // Camera
   Camera* camera = new Camera;
-  camera->eye_default = glm::vec3(0.0f, 0.0f, 0.0f);
+  camera->eye_default = glm::vec3(0.0f, 0.0f, 1.0f);
   camera->aspect_default = aspect_ratio;
   camera->reset();
 
@@ -60,9 +91,19 @@ int main() {
       for (int i = 0; i < image_width; ++i) {
         float u = float(i) / (image_width-1);
         float v = float(j) / (image_height-1);
-        Ray r(camera->eye, (lower_left_corner + u*horizontal + v*vertical - camera->eye));
-        glm::vec3 pixel_color = ray_color(r);
-        // glm::vec3 pixel_color = glm::vec3 (double(i)/(image_width-1), double(j)/(image_height-1), 0.25);
+
+        //test rayThruPixel
+        Ray* myRay = rayThruPixel(camera, i, j, image_width, image_height);
+        glm::vec3 p1 = glm::vec3(0.0f, -88.88f, -100.0f);
+        glm::vec3 p2 = glm::vec3(0.0f, 0.0f, -100.0f);
+        glm::vec3 p3 = glm::vec3(50.0f, 0.0f, -100.0f);
+        bool is_intersect = IntersectTriag(myRay, p1, p2, p3);
+
+        glm::vec3 pixel_color = glm::vec3(0.0f, 0.0f, 0.25);
+        if(is_intersect){
+          pixel_color = glm::vec3(1.0f, 1.0f, 0.25);
+        } 
+
         write_color(std::cout, pixel_color);
       }
   }

@@ -60,6 +60,43 @@ bool IntersectTriag(Ray* ray, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3){
   return (x[0] >= 0 &&  x[1] >= 0 && x[2] >= 0 && x[3] >= 0);
 }
 
+/**
+* Checks whether a ray would intersect with a sephere in front of camera
+* 
+* @param 
+* Ray* ray: target ray
+* glm::vec3 c: center of the sphere
+* float r: radius of the sphere, must be positive
+* 
+* @return
+* returns the direction of normal at the intersection to camera 
+*/
+glm::vec3 IntersectSeph(Ray* ray, glm::vec3 c, float r){
+
+  if (r < 0){ //invalid input
+    return glm::vec3(0, 0, 0);
+  }
+
+  glm::vec3 diff = ray->ori - c;
+  float b = dot(ray->dir, diff);
+
+  //calculate discriminant
+  float disc = b*b - pow(length(diff),2) + r*r;
+
+  if (disc < 0){  // no intersection
+    return glm::vec3(0, 0, 0);
+  } else {  // return nearest intersection
+    float t = -b - sqrt(disc);
+    glm::vec3 intersectPt = ray->ori + t * ray->dir;
+
+    //naive normal using center - intersectionPoint
+    glm::vec3 normal = c - intersectPt;
+    normal = glm::normalize(normal);
+
+    return normal;
+  }
+}
+
 int main() {
 
   // Image
@@ -97,12 +134,20 @@ int main() {
         glm::vec3 p1 = glm::vec3(0.0f, -88.88f, -100.0f);
         glm::vec3 p2 = glm::vec3(0.0f, 0.0f, -100.0f);
         glm::vec3 p3 = glm::vec3(50.0f, 0.0f, -100.0f);
-        bool is_intersect = IntersectTriag(myRay, p1, p2, p3);
+        bool triag_int = IntersectTriag(myRay, p1, p2, p3);
 
         glm::vec3 pixel_color = glm::vec3(0.0f, 0.0f, 0.25);
-        if(is_intersect){
-          pixel_color = glm::vec3(1.0f, 1.0f, 0.25);
-        } 
+        // if(triag_int){
+        //   pixel_color = glm::vec3(1.0f, 1.0f, 0.25);
+        // } 
+
+        glm::vec3 sphe_normal = IntersectSeph(myRay, p2, 50.0);
+      
+        float t1 = 0.5*(sphe_normal.x + 1.0);
+        float t2 = 0.5*(sphe_normal.y + 1.0);
+        float t3 = 0.5*(sphe_normal.z + 1.0);
+        pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0*t3);
+      
 
         write_color(std::cout, pixel_color);
       }

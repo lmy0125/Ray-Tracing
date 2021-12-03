@@ -78,11 +78,13 @@ int main() {
   // Scene
   Scene world;
 
-  Material* material = new Material;
+  Material* material1 = new Material;
+  Material* material2 = new Material;
+  material2 -> ambient = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
 
-  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -100.0f), 50.0f, material);
+  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -100.0f), 50.0f, material1);
   world.add(sphere1);
-  Sphere* sphere2 = new Sphere(glm::vec3(1.0f, 20.0f, -50.0f), 30.0f, material);
+  Sphere* sphere2 = new Sphere(glm::vec3(1.0f, 20.0f, -50.0f), 30.0f, material2);
   world.add(sphere2);
 
   // Render
@@ -115,10 +117,11 @@ int main() {
 
         //glm::vec3 sphe_normal = IntersectSeph(myRay, p2, 50.0);
       
-        float t1 = 0.5*(sphe_normal.x + 1.0);
-        float t2 = 0.5*(sphe_normal.y + 1.0);
-        float t3 = 0.5*(sphe_normal.z + 1.0);
-        pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0*t3);
+        // float t1 = 0.5*(sphe_normal.x + 1.0);
+        // float t2 = 0.5*(sphe_normal.y + 1.0);
+        // float t3 = 0.5*(sphe_normal.z + 1.0);
+        float m = hitPoint.material->ambient[0];
+        pixel_color = glm::vec3(1.0-m, 1.0, 1.0)+ glm::vec3(0.5*m, 0.7, 1.0);
       
 
         write_color(std::cout, pixel_color);

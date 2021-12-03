@@ -14,7 +14,7 @@ struct Intersection {
     bool isFront;       // is interesction inside of outside 
 };
 
-class Intersect {
+class Object {
   public:
     // constructor
     // Intersection() {}

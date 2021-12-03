@@ -6,14 +6,14 @@
 #include <vector>
 #include <limits>
 
-class Scene: public Intersect {
+class Scene: public Object {
   public:
-    std::vector<Intersect*> objects;
+    std::vector<Object*> objects;
 
     Scene() {}
-    Scene(Intersect* object) { objects.push_back(object); }
+    Scene(Object* object) { objects.push_back(object); }
 
-    void add(Intersect* object) { objects.push_back(object); };
+    void add(Object* object) { objects.push_back(object); };
     void clear() { objects.clear(); }
 
     virtual Intersection getIntersection(Ray* ray, float t_min, float t_max) override;
@@ -23,7 +23,7 @@ class Scene: public Intersect {
 Intersection Scene::getIntersection(Ray* ray, float t_min, float t_max) {
   float minDist = std::numeric_limits<double>::infinity();
   Intersection hit;
-  for (Intersect* object : objects) {
+  for (Object* object : objects) {
     // std::cerr << object.t;
     Intersection hit_temp = object->getIntersection(ray, 0.0, 0.0);
     if (hit_temp.t < minDist) {

@@ -29,7 +29,7 @@ Ray* rayThruPixel(Camera* cam, int i, int j, int width, int height) {
   v = glm::normalize(v);
 
   float x = 2 * (i + 0.5) / width - 1;
-  float y = 1 - 2 * (j + 0.5) / height;
+  float y = 2 * (j + 0.5) / height - 1;
 
   glm::vec3 pos = cam->eye;
   glm::vec3 dir = glm::normalize(x * u +  y * v / cam->aspect - w);
@@ -70,9 +70,12 @@ int main() {
 
   // Scene
   Scene world;
-  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f);
+
+  Material* material = new Material;
+
+  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, material);
   world.add(sphere1);
-  Sphere* sphere2 = new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f);
+  Sphere* sphere2 = new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f, material);
   world.add(sphere2);
 
   // Render
@@ -100,13 +103,25 @@ int main() {
         Intersection hitPoint = world.getIntersection(myRay, 0.0, 0.0);
 
         glm::vec3 sphe_normal = hitPoint.normal;
+        float t = hitPoint.t;
 
-        
-      
-        float t1 = 0.5*(sphe_normal.x + 1.0);
-        float t2 = 0.5*(sphe_normal.y + 1.0);
-        float t3 = 0.5*(sphe_normal.z + 1.0);
-        glm::vec3 pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0*t3);
+        // set color
+        glm::vec3 pixel_color;
+        if (sphe_normal != glm::vec3(0,0,0) && t > 0) {
+          pixel_color = 0.5f * (sphe_normal + glm::vec3(1,1,1));
+        }
+        // else if (sphe_normal != glm::vec3(0,0,0) && t < 0){
+        //   pixel_color = 0.9f * (sphe_normal + glm::vec3(1,1,1));
+        // }
+        else {
+          float t = 0.5f * (myRay->dir.y + 1.0f);
+          pixel_color = (1.0f-t)*glm::vec3(1.0f, 1.0f, 1.0f) + t*glm::vec3(0.5f, 0.7f, 1.0f);
+        }
+
+        // float t1 = 0.5*(sphe_normal.x + 1.0);
+        // float t2 = 0.5*(sphe_normal.y + 1.0);
+        // float t3 = 0.5*(sphe_normal.z + 1.0);
+        // pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0*t3);
       
         write_color(std::cout, pixel_color);
       }

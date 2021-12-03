@@ -26,12 +26,13 @@ Ray* rayThruPixel(Camera* cam, int i, int j, int width, int height) {
   glm::vec3 w = glm::normalize(cam->eye - cam->target);
   glm::vec3 u = glm::normalize(glm::cross(cam->up, w));
   glm::vec3 v = glm::cross(w, u);
+  v = glm::normalize(v);
 
   float x = 2 * (i + 0.5) / width - 1;
   float y = 1 - 2 * (j + 0.5) / height;
 
   glm::vec3 pos = cam->eye;
-  glm::vec3 dir = glm::normalize(x * u + y * v - w);
+  glm::vec3 dir = glm::normalize(x * u +  y * v / cam->aspect - w);
 
   Ray* ray = new Ray(pos, dir);
 
@@ -62,7 +63,8 @@ int main() {
 
   // Camera
   Camera* camera = new Camera;
-  camera->eye_default = glm::vec3(0.0f, 0.0f, 1.0f);
+  camera->eye_default = glm::vec3(0.0f, 0.0f, 0.0f);
+  camera->target_default = glm::vec3(0.0f, 0.0f, -1.0f);
   camera->aspect_default = aspect_ratio;
   camera->reset();
 
@@ -77,7 +79,7 @@ int main() {
   Scene world;
   Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -100.0f), 50.0f);
   world.add(sphere1);
-  Sphere* sphere2 = new Sphere(glm::vec3(1.0f, 50.0f, -50.0f), 30.0f);
+  Sphere* sphere2 = new Sphere(glm::vec3(1.0f, 20.0f, -50.0f), 30.0f);
   world.add(sphere2);
 
   // Render
@@ -113,7 +115,7 @@ int main() {
         float t1 = 0.5*(sphe_normal.x + 1.0);
         float t2 = 0.5*(sphe_normal.y + 1.0);
         float t3 = 0.5*(sphe_normal.z + 1.0);
-        pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0*t3);
+        pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0);
       
 
         write_color(std::cout, pixel_color);

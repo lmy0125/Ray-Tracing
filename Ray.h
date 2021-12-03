@@ -11,7 +11,7 @@ class Ray {
 
         Ray() {}
         Ray(glm::vec3 origin, glm::vec3 direction)
-            : ori(origin), dir(direction)
+            : ori(origin), dir(glm::normalize(direction))
         {}
 
         glm::vec3 origin() { return ori; }

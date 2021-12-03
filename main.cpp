@@ -15,8 +15,8 @@ void write_color(std::ostream &out, glm::vec3 pixel_color) {
 
 // shade the light color seen by the in-coming ray
 // glm::vec3 FindColor(Intersection hit) {}
-glm::vec3 ray_color(Ray& r) {
-    glm::vec3 unit_direction = glm::normalize(r.direction());
+glm::vec3 ray_color(Ray* r) {
+    glm::vec3 unit_direction = glm::normalize(r->dir);
     float t = 0.5f * (unit_direction.y + 1.0f);
     return (1.0f-t)*glm::vec3(1.0, 1.0, 1.0) + t*glm::vec3(0.5, 0.7, 1.0);
 }
@@ -31,7 +31,8 @@ Ray* rayThruPixel(Camera* cam, int i, int j, int width, int height) {
   float y = 1 - 2 * (j + 0.5) / height;
 
   glm::vec3 pos = cam->eye;
-  glm::vec3 dir = glm::normalize(x * u + y * v - w);
+  glm::vec3 dir = glm::normalize(x * u + y * v /cam->aspect - w);
+
 
   Ray* ray = new Ray(pos, dir);
 
@@ -62,22 +63,19 @@ int main() {
 
   // Camera
   Camera* camera = new Camera;
-  camera->eye_default = glm::vec3(0.0f, 0.0f, 1.0f);
+  camera->eye_default = glm::vec3(0.0f, 0.0f, 0.0f);
+  camera->target_default = glm::vec3(0.0f, 0.0f, -1.0f);
   camera->aspect_default = aspect_ratio;
   camera->reset();
 
   float viewport_height = 2.0f;
   float viewport_width = aspect_ratio * viewport_height;
-  float focal_length = 1.0f;
-  glm::vec3 horizontal = glm::vec3(viewport_width, 0, 0);
-  glm::vec3 vertical = glm::vec3(0, viewport_height, 0);
-  glm::vec3 lower_left_corner = camera->eye - horizontal/2.0f - vertical/2.0f - glm::vec3(0, 0, focal_length);
 
   // Scene
   Scene world;
-  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -100.0f), 50.0f);
+  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.2f);
   world.add(sphere1);
-  Sphere* sphere2 = new Sphere(glm::vec3(1.0f, 50.0f, -50.0f), 30.0f);
+  Sphere* sphere2 = new Sphere(glm::vec3(0.0f, 0.2f, -1.2f), 0.2f);
   world.add(sphere2);
 
   // Render
@@ -92,29 +90,27 @@ int main() {
 
         //test rayThruPixel
         Ray* myRay = rayThruPixel(camera, i, j, image_width, image_height);
-        glm::vec3 p1 = glm::vec3(0.0f, -88.88f, -100.0f);
-        glm::vec3 p2 = glm::vec3(0.0f, 0.0f, -100.0f);
-        glm::vec3 p3 = glm::vec3(50.0f, 0.0f, -100.0f);
-        bool triag_int = IntersectTriag(myRay, p1, p2, p3);
+        // glm::vec3 p1 = glm::vec3(0.0f, -88.88f, -100.0f);
+        // glm::vec3 p2 = glm::vec3(0.0f, 0.0f, -100.0f);
+        // glm::vec3 p3 = glm::vec3(50.0f, 0.0f, -100.0f);
+        // bool triag_int = IntersectTriag(myRay, p1, p2, p3);
 
-        glm::vec3 pixel_color = glm::vec3(0.0f, 0.0f, 0.25);
+        // glm::vec3 pixel_color = glm::vec3(0.0f, 0.0f, 0.25);
         // if(triag_int){
         //   pixel_color = glm::vec3(1.0f, 1.0f, 0.25);
         // } 
+        glm::vec3 pixel_color = glm::vec3(0.0f, 0.0f, 0.25);
 
         Intersection hitPoint = world.getIntersection(myRay, 0.0, 0.0);
 
         // Sphere sphere = Sphere(p2, 50.0f);
         // Intersection hitPoint = sphere.getIntersection(myRay, 0.0, 0.0);
         glm::vec3 sphe_normal = hitPoint.normal;
-
-        //glm::vec3 sphe_normal = IntersectSeph(myRay, p2, 50.0);
       
         float t1 = 0.5*(sphe_normal.x + 1.0);
         float t2 = 0.5*(sphe_normal.y + 1.0);
         float t3 = 0.5*(sphe_normal.z + 1.0);
         pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0*t3);
-      
 
         write_color(std::cout, pixel_color);
       }
@@ -122,7 +118,7 @@ int main() {
   std::cerr << "\nDone.\n";
 }
 
-// sudo code in slide
+// pesudo code in slide
 // Image Raytrace(Camera cam, Scene scene, int width, int height){
 //   Image image = new Image(width,height);
 //   for (int j=0; j<height; j++)

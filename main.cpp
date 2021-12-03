@@ -77,9 +77,12 @@ int main() {
 
   // Scene
   Scene world;
-  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -100.0f), 50.0f);
+
+  Material* material = new Material;
+
+  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -100.0f), 50.0f, material);
   world.add(sphere1);
-  Sphere* sphere2 = new Sphere(glm::vec3(1.0f, 20.0f, -50.0f), 30.0f);
+  Sphere* sphere2 = new Sphere(glm::vec3(1.0f, 20.0f, -50.0f), 30.0f, material);
   world.add(sphere2);
 
   // Render
@@ -115,7 +118,7 @@ int main() {
         float t1 = 0.5*(sphe_normal.x + 1.0);
         float t2 = 0.5*(sphe_normal.y + 1.0);
         float t3 = 0.5*(sphe_normal.z + 1.0);
-        pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0);
+        pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0*t3);
       
 
         write_color(std::cout, pixel_color);

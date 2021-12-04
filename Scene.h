@@ -26,6 +26,7 @@ class Scene: public Object {
     void clear() { objects.clear(); }
 
     virtual Intersection getIntersection(Ray* ray, float t_min, float t_max) override;
+    glm::vec3 findColor(Intersection* intersection);
 };
 
 // searches over all geometries in the scene and returns the closest hit
@@ -45,7 +46,7 @@ Intersection Scene::getIntersection(Ray* ray, float t_min, float t_max) {
 
 
 // given intersection, find the color from all light sources in scene
-glm::vec3 findColor(Intersection* intersection){
+glm::vec3 Scene::findColor(Intersection* intersection){
 
   glm::vec3 color = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -61,7 +62,7 @@ glm::vec3 findColor(Intersection* intersection){
 
     //if yes, skip this light source
     // in shadow
-    if (shadowInt->normal != glm::vec3(0.0f, 0.0f, 0.0f)){
+    if (shadowInt.normal != glm::vec3(0.0f, 0.0f, 0.0f)){
       continue;
     }
 
@@ -70,6 +71,8 @@ glm::vec3 findColor(Intersection* intersection){
       //implement the formula
     }
   }
+
+  return color;
 
 }
 

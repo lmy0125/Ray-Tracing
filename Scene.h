@@ -70,9 +70,7 @@ glm::vec3 Scene::findColor(Intersection* intersection){
 
     //if yes, skip this light source
     // in shadow
-    if ((shadowInt.normal != glm::vec3(0.0f, 0.0f, 0.0f) || shadowInt.frontOnly )){
-      continue;
-    }
+    if ((shadowInt.normal != glm::vec3(0.0f, 0.0f, 0.0f) || shadowInt.frontOnly)) { continue; }
 
     //otherwise, apply the shading formula and add to color
     else{

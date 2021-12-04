@@ -82,9 +82,9 @@ int main() {
   Material* material2 = new Material;
   material2 -> ambient = glm::vec3(1.0f, 0.0f, 0.0f);
 
-  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -100.0f), 50.0f, material1);
+  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, material1);
   world.add(sphere1);
-  Sphere* sphere2 = new Sphere(glm::vec3(1.0f, 20.0f, -50.0f), 30.0f, material2);
+  Sphere* sphere2 = new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f, material2);
   world.add(sphere2);
 
   // Render

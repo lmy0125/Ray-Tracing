@@ -69,7 +69,7 @@ glm::vec3 Scene::findColor(Intersection* intersection){
     //otherwise, apply the shading formula and add to color
     else{
       //implement the formula
-
+      
     }
   }
 

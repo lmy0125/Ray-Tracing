@@ -10,14 +10,14 @@ class Ray {
         glm::vec3 dir;  // b
 
         Ray() {}
-        Ray(glm::vec3 origin, glm::vec3 direction)
-            : ori(origin), dir(direction)
+        Ray(const glm::vec3 origin, const glm::vec3 direction)
+            : ori(origin), dir(glm::normalize(direction))
         {}
 
-        glm::vec3 origin() { return ori; }
-        glm::vec3 direction() { return dir; }
+        // glm::vec3 origin() { return ori; }
+        // glm::vec3 direction() { return dir; }
 
-        glm::vec3 at(float t) {
+        glm::vec3 at(float t) const {
             return ori + t*dir;
         }
 };

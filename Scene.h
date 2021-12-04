@@ -6,12 +6,21 @@
 #include <vector>
 #include <limits>
 
+struct Light {
+    glm::vec3 position = glm::vec3(0.0f, 70.0f, -75.0f);
+    glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+};
+
 class Scene: public Object {
   public:
     std::vector<Object*> objects;
+    std::vector<Light*> lights;
 
     Scene() {}
-    Scene(Object* object) { objects.push_back(object); }
+    Scene(Object* object, Light* light) { 
+      objects.push_back(object); 
+      lights.push_back(light);
+    }
 
     void add(Object* object) { objects.push_back(object); };
     void clear() { objects.clear(); }
@@ -33,6 +42,37 @@ Intersection Scene::getIntersection(Ray* ray, float t_min, float t_max) {
   }
   return hit;
 }
+
+
+// given intersection, find the color from all light sources in scene
+glm::vec3 findColor(Intersection* intersection){
+
+  glm::vec3 color = glm::vec3(0.0f, 0.0f, 0.0f);
+
+  //iterate through all light sources
+  for (Light* light : lights){
+    //find the shadow ray -- ray from intersection point to light
+    glm::vec3 ori = intersection->pos;
+    glm::vec3 dir = glm::normalize(ori - light->position);
+    Ray * shadowRay = new Ray(ori, dir);
+
+    //decide if shadow ray intersects with other objects in scene
+    Intersection shadowInt = getIntersection(shadowRay, 0, 0);
+
+    //if yes, skip this light source
+    // in shadow
+    if (shadowInt->normal != glm::vec3(0.0f, 0.0f, 0.0f)){
+      continue;
+    }
+
+    //otherwise, apply the shading formula and add to color
+    else{
+      //implement the formula
+    }
+  }
+
+}
+
 
 #endif
 

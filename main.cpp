@@ -71,7 +71,9 @@ int main() {
   // Scene
   Scene world;
 
-  Material* material = new Material;
+  Material* material1 = new Material;
+  Material* material2 = new Material;
+  material2 -> ambient = glm::vec3(1.0f, 0.0f, 0.0f);
 
   Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, material);
   world.add(sphere1);
@@ -123,6 +125,10 @@ int main() {
         // float t3 = 0.5*(sphe_normal.z + 1.0);
         // pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0*t3);
       
+        float m = hitPoint.material->ambient[0];
+        pixel_color = glm::vec3(1.0-m, 1.0, 1.0)+ glm::vec3(0.5*m, 0.7, 1.0);
+      
+
         write_color(std::cout, pixel_color);
       }
   }

@@ -6,14 +6,6 @@
 #include "glm-0.9.7.1/glm/glm.hpp"
 #include "Intersection.h"
 
-struct Material {
-  glm::vec4 ambient = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-  glm::vec4 diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-  glm::vec4 specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-  glm::vec4 emision = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-  float shininess = 10.0f;
-};
-
 class Sphere: public Object {
   public: 
     float radius;
@@ -63,7 +55,7 @@ Intersection Sphere::getIntersection(Ray* ray, float t_min, float t_max) {
 
   if (disc < 0){  // no intersection
     Intersection intersection;
-    intersection.normal = glm::vec3(0,0,0);
+    intersection.normal = glm::vec3(0.0f, 0.0f, 0.0f);
     return intersection;
   } else {  // return nearest intersection
     float t = -b - sqrt(disc);
@@ -82,7 +74,7 @@ Intersection Sphere::getIntersection(Ray* ray, float t_min, float t_max) {
     intersection.pos = intersectPt;
     intersection.normal = normal;
     intersection.t = t;
-    // std::cerr << glm::to_string(intersection.normal) << "\n";
+    intersection.material = material;
     return intersection;
   }
 }

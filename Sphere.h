@@ -34,6 +34,7 @@ Intersection Sphere::getIntersection(Ray* ray, float t_min, float t_max) {
 
   if (disc < 0){  // no intersection
     Intersection intersection;
+    intersection.normal = glm::vec3(0.0f, 0.0f, 0.0f);
     return intersection;
   } else {  // return nearest intersection
     float t = -b - sqrt(disc);

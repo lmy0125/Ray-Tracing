@@ -80,7 +80,7 @@ int main() {
 
   Material* material1 = new Material;
   Material* material2 = new Material;
-  material2 -> ambient = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+  material2 -> ambient = glm::vec3(1.0f, 0.0f, 0.0f);
 
   Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -100.0f), 50.0f, material1);
   world.add(sphere1);

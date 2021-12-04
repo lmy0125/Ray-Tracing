@@ -59,13 +59,16 @@ int main() {
 
   Material* material1 = new Material;
   Material* material2 = new Material;
-  material2 -> ambient = glm::vec3(1.0f, 0.0f, 0.0f);
+  material2 -> emision = glm::vec3(0.0f, 0.0f, 0.0f);
 
   Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.3f, material1);
   // world.add(sphere1);
-  Sphere* sphere2 = new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f, material2);
-  world.add(sphere2);
-  world.add(sphere1);
+  Sphere* sphere2 = new Sphere(glm::vec3(0.0f, -200.3f, -1.0f), 200.0f, material2);
+  world.add_obj(sphere2);
+  world.add_obj(sphere1);
+
+  Light* light = new Light;
+  world.add_light(light);
 
   // Render
   std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -83,15 +86,13 @@ int main() {
         float t = hitPoint.t;
 
         // set color
-        glm::vec3 pixel_color;
-        if (sphe_normal != glm::vec3(0,0,0)) {
-          pixel_color = 0.5f * (sphe_normal + glm::vec3(1,1,1));
+        glm::vec3 pixel_color = glm::vec3(0.9f, 0.9f, 0.9f);
+
+        //set color using FindColor
+        if (hitPoint.normal != glm::vec3(0.0f, 0.0f, 0.0f)){
+          pixel_color = world.findColor(&hitPoint);
         }
-        else {
-          float t = 0.5f * (myRay->dir.y + 1.0f);
-          pixel_color = (1.0f-t)*glm::vec3(1.0f, 1.0f, 1.0f) + t*glm::vec3(0.5f, 0.7f, 1.0f);
-        }
-      
+  
         write_color(std::cout, pixel_color);
       }
   }

@@ -35,24 +35,30 @@ Intersection Sphere::getIntersection(Ray* ray, float t_min, float t_max) {
   //calculate discriminant
   float disc = b*b - pow(length(diff),2) + radius*radius;
 
-  if (disc < 0) {  // no intersection
+  if (disc < 0){  // no intersection
+    Intersection intersection;
+    intersection.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+    intersection.frontOnly = false;
     return intersection;
   } else {  // return nearest intersection
     float t = -b - sqrt(disc);
     if (t < 0) {
-      intersection.normal = glm::vec3(0,0,0);
+      Intersection intersection;
+      intersection.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+      intersection.frontOnly = (-b + sqrt(disc) > 0.001)?true:false;
       return intersection;
     }
     glm::vec3 intersectPt = ray->ori + t * ray->dir;
 
     //naive normal using center - intersectionPoint
-    glm::vec3 normal = center - intersectPt;
-    normal = glm::normalize(normal);
+    glm::vec3 normal = glm::normalize(center - intersectPt);
 
     intersection.pos = intersectPt;
     intersection.normal = normal;
     intersection.t = t;
     intersection.material = material;
+    intersection.dir = glm::normalize(-ray->dir);
+    intersection.frontOnly = (t>0.001)?true:false;
     return intersection;
   }
 }

@@ -48,7 +48,7 @@ Intersection Scene::getIntersection(Ray* ray, float t_min, float t_max) {
 // given intersection, find the color from all light sources in scene
 glm::vec3 Scene::findColor(Intersection* intersection){
 
-  glm::vec3 color = glm::vec3(0.0f, 0.0f, 0.0f);
+  glm::vec3 color = intersection->material->emision;
 
   //iterate through all light sources
   for (Light* light : lights){

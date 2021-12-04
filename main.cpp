@@ -75,7 +75,7 @@ int main() {
   Material* material2 = new Material;
   material2 -> ambient = glm::vec3(1.0f, 0.0f, 0.0f);
 
-  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, material1);
+  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, material2);
   world.add(sphere1);
   Sphere* sphere2 = new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f, material2);
   world.add(sphere2);
@@ -87,9 +87,6 @@ int main() {
   for (int j = image_height-1; j >= 0; --j) {
     std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
       for (int i = 0; i < image_width; ++i) {
-        float u = float(i) / (image_width-1);
-        float v = float(j) / (image_height-1);
-
         //test rayThruPixel
         Ray* myRay = rayThruPixel(camera, i, j, image_width, image_height);
         glm::vec3 p1 = glm::vec3(0.0f, -88.88f, -100.0f);
@@ -117,15 +114,10 @@ int main() {
           pixel_color = (1.0f-t)*glm::vec3(1.0f, 1.0f, 1.0f) + t*glm::vec3(0.5f, 0.7f, 1.0f);
         }
 
-        // float t1 = 0.5*(sphe_normal.x + 1.0);
-        // float t2 = 0.5*(sphe_normal.y + 1.0);
-        // float t3 = 0.5*(sphe_normal.z + 1.0);
-        // pixel_color = glm::vec3(1.0-t1, 1.0-t2, 1.0-t3)+ glm::vec3(0.5*t1, 0.7*t2, 1.0*t3);
-      
-        float m = hitPoint.material->ambient[0];
+        // float m = hitPoint.material->ambient[0];
+        // float m = hitPoint.material->ambient[0];
         // pixel_color = glm::vec3(1.0-m, 1.0, 1.0)+ glm::vec3(0.5*m, 0.7, 1.0);
       
-
         write_color(std::cout, pixel_color);
       }
   }

@@ -19,7 +19,7 @@ struct Intersection {
     glm::vec3 normal;   // surface normal
     float t;            // distance to the source of object, t
     glm::vec3 dir;      // direction to the in-coming ray
-    Material* material;  // pointers to material 
+    Material* material = new Material;  // pointers to material 
     bool isFront;       // is interesction inside of outside 
 };
 

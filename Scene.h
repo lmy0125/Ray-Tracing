@@ -33,8 +33,6 @@ class Scene: public Object {
 Intersection Scene::getIntersection(Ray* ray, float t_min, float t_max) {
   float minDist = std::numeric_limits<double>::infinity();
   Intersection hit;
-  // Material* defaultMaterial = new Material;
-  // hit.material = defaultMaterial;
   for (Object* object : objects) {
     // std::cerr << object.t;
     Intersection hit_temp = object->getIntersection(ray, 0.0, 0.0);

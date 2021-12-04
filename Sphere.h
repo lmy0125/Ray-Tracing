@@ -22,9 +22,11 @@ class Sphere: public Object {
 
 Intersection Sphere::getIntersection(Ray* ray, float t_min, float t_max) {
   //invalid input
+  Intersection intersection;
+  intersection.dir = ray->dir;
   if (radius < 0){ 
     std::cerr << "Exception *** Sphere's raduis < 0.";
-    return Intersection();
+    return intersection;
   }
 
   glm::vec3 diff = ray->ori - center;
@@ -33,14 +35,11 @@ Intersection Sphere::getIntersection(Ray* ray, float t_min, float t_max) {
   //calculate discriminant
   float disc = b*b - pow(length(diff),2) + radius*radius;
 
-  if (disc < 0){  // no intersection
-    Intersection intersection;
-    intersection.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+  if (disc < 0) {  // no intersection
     return intersection;
   } else {  // return nearest intersection
     float t = -b - sqrt(disc);
     if (t < 0) {
-      Intersection intersection;
       intersection.normal = glm::vec3(0,0,0);
       return intersection;
     }
@@ -50,7 +49,6 @@ Intersection Sphere::getIntersection(Ray* ray, float t_min, float t_max) {
     glm::vec3 normal = center - intersectPt;
     normal = glm::normalize(normal);
 
-    Intersection intersection;
     intersection.pos = intersectPt;
     intersection.normal = normal;
     intersection.t = t;

@@ -5,18 +5,38 @@
 #include "Sphere.h"
 #include "Camera.cpp"
 #include "Scene.h"
+#include "helper.cpp"
 
-void write_color(std::ostream &out, glm::vec3 pixel_color) {
+void write_color(std::ostream &out, glm::vec3 pixel_color, int sample_per_pixel) {
     // Write the translated [0,255] value of each color component.
+    float r = pixel_color.x;
+    float g = pixel_color.y;
+    float b = pixel_color.z;
+
     out << static_cast<int>(255.999 * pixel_color.x) << ' '
         << static_cast<int>(255.999 * pixel_color.y) << ' '
         << static_cast<int>(255.999 * pixel_color.z) << '\n';
 }
 
 // shade the light color seen by the in-coming ray
-// glm::vec3 FindColor(Intersection hit) {}
+glm::vec3 findColor(Intersection hit) {
+  float t = hit.t;
+  glm::vec3 normal = hit.normal;
+
+  glm::vec3 pixelColor;
+  if (normal != glm::vec3(0,0,0)) {
+    pixelColor = 0.5f * (normal + glm::vec3(1.0f,1.0f,1.0f));
+  }
+  else {
+    float t = 0.5f * (hit.dir.y + 1.0f);
+    pixelColor = (1.0f-t)*glm::vec3(1.0f, 1.0f, 1.0f) + t*glm::vec3(0.5f, 0.7f, 1.0f);
+  }
+
+  return pixelColor;
+}
+
 glm::vec3 ray_color(Ray& r) {
-    glm::vec3 unit_direction = glm::normalize(r.direction());
+    glm::vec3 unit_direction = glm::normalize(r.dir);
     float t = 0.5f * (unit_direction.y + 1.0f);
     return (1.0f-t)*glm::vec3(1.0, 1.0, 1.0) + t*glm::vec3(0.5, 0.7, 1.0);
 }
@@ -28,30 +48,16 @@ Ray* rayThruPixel(Camera* cam, int i, int j, int width, int height) {
   glm::vec3 v = glm::cross(w, u);
   v = glm::normalize(v);
 
-  float x = 2 * (i + 0.5) / width - 1;
-  float y = 2 * (j + 0.5) / height - 1;
+  float x = 2 * (i + 0.5f) / width - 1;
+  float y = 2 * (j + 0.5f) / height - 1;
 
   glm::vec3 pos = cam->eye;
   glm::vec3 dir = glm::normalize(x * u +  y * v / cam->aspect - w);
+  // glm::vec3 dir = glm::normalize(glm::vec3(x,y/ cam->aspect,-1.0f) - pos); 
 
   Ray* ray = new Ray(pos, dir);
 
   return ray;
-}
-
-// Checks whether a ray would interset with a triangle in front of camera
-bool IntersectTriag(Ray* ray, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3){
-  // TODO: there is still something wrong with the view/transformation
-
-  glm::mat4 A = glm::mat4(p1[0], p1[1], p1[2], 1, 
-                          p2[0], p2[1], p2[2], 1, 
-                          p3[0], p3[1], p3[2], 1,
-                          -ray->dir[0], -ray->dir[1], -ray->dir[2], 0);
-  glm::vec4 b = glm::vec4(ray->ori, 1);
-
-  glm::vec4 x = glm::inverse(A) * b;
-
-  return (x[0] >= 0 &&  x[1] >= 0 && x[2] >= 0 && x[3] >= 0);
 }
 
 int main() {
@@ -60,6 +66,8 @@ int main() {
   const float aspect_ratio = 16.0f / 9.0f;
   const int image_width = 400;
   const int image_height = static_cast<int>(image_width / aspect_ratio);
+  // for antialiasing
+  const int sample_per_pixel = 100;
 
   // Camera
   Camera* camera = new Camera;
@@ -83,42 +91,33 @@ int main() {
   // Render
   std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
+  float viewport_height = 2.0f;
+  float viewport_width = aspect_ratio * viewport_height;
+  float focal_length = 1.0f;
+
+  glm::vec3 horizontal = glm::vec3(viewport_width, 0, 0);
+  glm::vec3 vertical = glm::vec3(0, viewport_height, 0);
+  glm::vec3 lower_left_corner = camera->eye - horizontal/2.0f - vertical/2.0f - glm::vec3(0, 0, focal_length);
+
   // for each pixel in the scene
   for (int j = image_height-1; j >= 0; --j) {
     std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
       for (int i = 0; i < image_width; ++i) {
-        //test rayThruPixel
-        Ray* myRay = rayThruPixel(camera, i, j, image_width, image_height);
-        glm::vec3 p1 = glm::vec3(0.0f, -88.88f, -100.0f);
-        glm::vec3 p2 = glm::vec3(0.0f, 0.0f, -100.0f);
-        glm::vec3 p3 = glm::vec3(50.0f, 0.0f, -100.0f);
-        bool triag_int = IntersectTriag(myRay, p1, p2, p3);
-
-        //  pixel_color = glm::vec3(0.0f, 0.0f, 0.25);
-        // if(triag_int){
-        //   pixel_color = glm::vec3(1.0f, 1.0f, 0.25);
-        // } 
-
-        Intersection hitPoint = world.getIntersection(myRay, 0.0, 0.0);
-
-        glm::vec3 sphe_normal = hitPoint.normal;
-        float t = hitPoint.t;
-
-        // set color
+        // antialiasing, average color for each pixel
         glm::vec3 pixel_color;
-        if (sphe_normal != glm::vec3(0,0,0)) {
-          pixel_color = 0.5f * (sphe_normal + glm::vec3(1,1,1));
-        }
-        else {
-          float t = 0.5f * (myRay->dir.y + 1.0f);
-          pixel_color = (1.0f-t)*glm::vec3(1.0f, 1.0f, 1.0f) + t*glm::vec3(0.5f, 0.7f, 1.0f);
-        }
+        // for (int k = 0; k < sample_per_pixel; k++) {
+          float u = float(i) / (image_width-1);
+          float v = float(j) / (image_height-1);
+          // Ray* myRay = rayThruPixel(camera, i, j, image_width, image_height);
+          Ray* myRay = new Ray(camera->eye, lower_left_corner + u*horizontal + v*vertical);
 
-        // float m = hitPoint.material->ambient[0];
-        // float m = hitPoint.material->ambient[0];
-        // pixel_color = glm::vec3(1.0-m, 1.0, 1.0)+ glm::vec3(0.5*m, 0.7, 1.0);
-      
-        write_color(std::cout, pixel_color);
+          Intersection hitPoint = world.getIntersection(myRay, 0.0, 0.0);
+
+          pixel_color = findColor(hitPoint);
+        // }
+
+
+        write_color(std::cout, pixel_color, sample_per_pixel);
       }
   }
   std::cerr << "\nDone.\n";

@@ -3,6 +3,7 @@
 
 #include "glm-0.9.7.1/glm/glm.hpp"
 #include "Ray.h"
+#include <limits>
 
 // Material of the object
 struct Material {
@@ -16,8 +17,8 @@ struct Material {
 // Intersection of a ray and an object, hittable object
 struct Intersection {
     glm::vec3 pos;      // position of the intersection
-    glm::vec3 normal;   // surface normal
-    float t;            // distance to the source of object, t
+    glm::vec3 normal = glm::vec3(0.0f, 0.0f, 0.0f);   // surface normal
+    float t = std::numeric_limits<double>::infinity();            // distance to the source of object, t
     glm::vec3 dir;      // direction to the in-coming ray
     Material* material = new Material;  // pointers to material 
     bool isFront;       // is interesction inside of outside 
@@ -25,15 +26,7 @@ struct Intersection {
 
 class Object {
   public:
-    // constructor
-    // Intersection() {}
-    // Intersection(glm::vec3 pos, glm::vec3 normal, float t)
-    //   : pos(pos), normal(normal), t(t) {}
-
     virtual Intersection getIntersection(Ray* ray, float t_min, float t_max) = 0;
-
-    // searches over all geometries in the scene and returns the closest hit
-    // Intersection IntersectScene(Ray* ray, float t_min, float t_max);
 };
 
 #endif

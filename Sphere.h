@@ -40,27 +40,31 @@ Intersection Sphere::getIntersection(Ray* ray, float t_min, float t_max) {
     intersection.normal = glm::vec3(0.0f, 0.0f, 0.0f);
     intersection.frontOnly = false;
     return intersection;
-  } else {  // return nearest intersection
-    float t = -b - sqrt(disc);
-    if (t < 0) {
-      Intersection intersection;
-      intersection.normal = glm::vec3(0.0f, 0.0f, 0.0f);
-      intersection.frontOnly = (-b + sqrt(disc) > 0.001)?true:false;
-      return intersection;
-    }
-    glm::vec3 intersectPt = ray->ori + t * ray->dir;
-
-    //naive normal using center - intersectionPoint
-    glm::vec3 normal = glm::normalize(center - intersectPt);
-
-    intersection.pos = intersectPt;
-    intersection.normal = normal;
-    intersection.t = t;
-    intersection.material = material;
-    intersection.dir = glm::normalize(-ray->dir);
-    intersection.frontOnly = (t>0.001)?true:false;
+  } 
+  // return nearest intersection
+  float t = -b - sqrt(disc);
+  if (t < 0.001f || t > std::numeric_limits<double>::infinity()) {
+    Intersection intersection;
+    intersection.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+    intersection.frontOnly = (-b + sqrt(disc) > 0.001)?true:false;
     return intersection;
   }
+  glm::vec3 intersectPt = ray->ori + t * ray->dir;
+
+  //naive normal using center - intersectionPoint
+  glm::vec3 normal = glm::normalize(center - intersectPt);
+
+  intersection.pos = intersectPt;
+  // intersection.normal = normal;
+  glm::vec3 outNormal = (intersection.pos - center) / radius;
+  intersection.setFrontNormal(&intersection, outNormal);
+  intersection.t = t;
+  intersection.material = material;
+  intersection.dir = glm::normalize(-ray->dir);
+  intersection.frontOnly = (t>0.001)?true:false;
+  intersection.onHit = true;
+  return intersection;
+  
 }
 
 #endif

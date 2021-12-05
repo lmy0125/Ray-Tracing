@@ -27,7 +27,7 @@ void write_color(std::ostream &out, glm::vec3 pixel_color) {
 
 // shade the light color seen by the in-coming ray
 glm::vec3 findColor(Intersection hit) {
-  float t = hit.t;
+  // float t = hit.t;
   glm::vec3 normal = hit.normal;
 
   glm::vec3 pixelColor;
@@ -75,10 +75,12 @@ int main() {
 
   // Image
   const float aspect_ratio = 16.0f / 9.0f;
-  const int image_width = 800;
+  const int image_width = 400;
   const int image_height = static_cast<int>(image_width / aspect_ratio);
   // for antialiasing
-  const int sample_per_pixel = 20;
+  const int sample_per_pixel = 10;
+  // for recursive ray tracing
+  const int recur_depth = 10;
 
   // Camera
   Camera* camera = new Camera;
@@ -100,18 +102,10 @@ int main() {
   world.add_obj(sphere1);
 
   Light* light = new Light;
-  world.add_light(light);
+  // world.add_light(light);
 
   // Render
   std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
-  float viewport_height = 2.0f;
-  float viewport_width = aspect_ratio * viewport_height;
-  float focal_length = 1.0f;
-
-  glm::vec3 horizontal = glm::vec3(viewport_width, 0, 0);
-  glm::vec3 vertical = glm::vec3(0, viewport_height, 0);
-  glm::vec3 lower_left_corner = camera->eye - horizontal/2.0f - vertical/2.0f - glm::vec3(0, 0, focal_length);
 
   // for each pixel in the scene
   for (int j = image_height-1; j >= 0; --j) {
@@ -123,24 +117,17 @@ int main() {
         std::vector<Ray*> myRay = rayThruPixel(camera, i, j, image_width, image_height, sample_per_pixel);
         //  myRay = new Ray(camera->eye, lower_left_corner + u*horizontal + v*vertical);
         for (Ray* ray : myRay) {
-          Intersection hitPoint = world.getIntersection(ray, 0.0, 0.0);
+          Intersection hitPoint = world.getIntersection(ray, 0.001f, std::numeric_limits<double>::infinity());
           // ray_color.push_back(findColor(hitPoint));
-          // // set color
-          ray_color.push_back(glm::vec3(0.9f, 0.9f, 0.9f));
-          //set color using FindColor
-          if (hitPoint.normal != glm::vec3(0.0f, 0.0f, 0.0f)){
-            ray_color.push_back(world.findColor(&hitPoint));
-          }
-        }
 
+          //set color using FindColor
+          ray_color.push_back(world.findColor(&hitPoint, recur_depth));
+        }
         pixel_color = std::accumulate(ray_color.begin(), ray_color.end(), decltype(ray_color)::value_type(0));
         pixel_color = pixel_color * (1.0f / sample_per_pixel) ;
 
         // std::cerr << pixel_color.x << " "<< pixel_color.y << " " << pixel_color.z << "\n";
         write_color(std::cout, pixel_color);
-
-
-
       }
   }
   std::cerr << "\nDone.\n";

@@ -17,12 +17,12 @@ inline float clamp(float x, float min, float max) {
 
 void write_color(std::ostream &out, glm::vec3 pixel_color) {
     // Write the translated [0,255] value of each color component.
-    // out << static_cast<int>(256 * clamp(pixel_color.x, 0.0, 0.999)) << ' '
-    //   << static_cast<int>(256 * clamp(pixel_color.y, 0.0, 0.999)) << ' '
-    //   << static_cast<int>(256 * clamp(pixel_color.z, 0.0, 0.999)) << '\n';
-        out << static_cast<int>(255.999 * pixel_color.x) << ' '
-        << static_cast<int>(255.999 * pixel_color.y) << ' '
-        << static_cast<int>(255.999 * pixel_color.z) << '\n';
+    out << static_cast<int>(256 * clamp(pixel_color.x, 0.0, 0.999)) << ' '
+      << static_cast<int>(256 * clamp(pixel_color.y, 0.0, 0.999)) << ' '
+      << static_cast<int>(256 * clamp(pixel_color.z, 0.0, 0.999)) << '\n';
+        // out << static_cast<int>(255.999 * pixel_color.x) << ' '
+        // << static_cast<int>(255.999 * pixel_color.y) << ' '
+        // << static_cast<int>(255.999 * pixel_color.z) << '\n';
   }
 
 // shade the light color seen by the in-coming ray
@@ -102,7 +102,8 @@ int main() {
   world.add_obj(sphere1);
 
   Light* light = new Light;
-  // world.add_light(light);
+  // light->color = glm::vec3(0.5f, 0.7f, 1.0f);
+  world.add_light(light);
 
   // Render
   std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";

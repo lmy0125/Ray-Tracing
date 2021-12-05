@@ -56,13 +56,12 @@ inline float random_float(float min, float max) {
     float random01 = rand() / (RAND_MAX + 1.0f);
     return min + (max-min) * random01;
 }
-glm::vec3 random_vec(float min, float max) {
-  // Returns a random vector.
-  return glm::vec3(random_float(min,max), random_float(min,max), random_float(min,max));
-}
+
 glm::vec3 random_in_unit_sphere() {
     while (true) {
-        glm::vec3 p = random_vec(-1.0f,1.0f);
+        float min = -1.0f;
+        float max = 1.0f;
+        glm::vec3 p = glm::vec3(random_float(min,max), random_float(min,max), random_float(min,max));
         if (glm::length(p) >= 1) continue;
         return p;
     }
@@ -83,10 +82,10 @@ glm::vec3 Scene::findColor(Intersection* intersection, int depth){
   }
 
   // color on object hit
-  glm::vec3 target = intersection->pos + intersection->normal + random_in_unit_sphere();
-  Ray* ray2 = new Ray(intersection->pos, target - intersection->pos);
-  Intersection intersection2 = this->getIntersection(ray2, 0.001f, std::numeric_limits<double>::infinity());
-  return 0.5f * this->findColor(&intersection2, depth-1);
+  // glm::vec3 target = intersection->pos + intersection->normal + random_in_unit_sphere();
+  // Ray* ray2 = new Ray(intersection->pos, target - intersection->pos);
+  // Intersection intersection2 = this->getIntersection(ray2, 0.001f, std::numeric_limits<double>::infinity());
+  // return 0.5f * this->findColor(&intersection2, depth-1);
 
   glm::vec3 color = intersection->material->emision;
 
@@ -102,10 +101,10 @@ glm::vec3 Scene::findColor(Intersection* intersection, int depth){
 
     //if yes, skip this light source
     // in shadow
-    if ((shadowInt.normal != glm::vec3(0.0f, 0.0f, 0.0f) || shadowInt.frontOnly)) { continue; }
+    // if ((shadowInt.normal != glm::vec3(0.0f, 0.0f, 0.0f) || shadowInt.frontOnly)) { continue; }
 
     //otherwise, apply the shading formula and add to color
-    else{
+    // else{
       //implement the formula
       glm::vec3 lj = glm::normalize(intersection->pos - light->position);
       glm::vec3 n = glm::normalize(intersection->normal);
@@ -119,14 +118,14 @@ glm::vec3 Scene::findColor(Intersection* intersection, int depth){
       
       color += C * light->color;
 
-      // glm::vec3 target = intersection->pos + intersection->normal + random_in_unit_sphere();
-      // Ray* ray2 = new Ray(intersection->pos, target - intersection->pos);
-      // Intersection intersection2 = this->getIntersection(ray2, 0, 0);
-      // color += this->findColor(&intersection2, depth-1);
-    }
+      glm::vec3 target = intersection->pos + intersection->normal + random_in_unit_sphere();
+      Ray* ray2 = new Ray(intersection->pos, target - intersection->pos);
+      Intersection intersection2 = this->getIntersection(ray2, 0, 0);
+      color += 0.5f * this->findColor(&intersection2, depth-1);
+    // }
   }
 
-  // return color;
+  return color;
 }
 
 // Color FindColor( hit ){

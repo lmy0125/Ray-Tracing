@@ -101,9 +101,14 @@ int main() {
   world.add_obj(sphere2);
   world.add_obj(sphere1);
 
-  Light* light = new Light;
-  // light->color = glm::vec3(0.5f, 0.7f, 1.0f);
-  world.add_light(light);
+  Light* light1 = new Light;
+  light1->color = glm::vec3(0.5f, 0.7f, 1.0f);
+  light1->position = glm::vec3(-0.5f, 1.2f, -2.0f);
+  world.add_light(light1);
+  // Light* light2 = new Light;
+  // light2->position = glm::vec3(0.5f, 1.2f, -2.0f);
+  // world.add_light(light2);
+
 
   // Render
   std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";

@@ -75,12 +75,12 @@ int main() {
 
   // Image
   const float aspect_ratio = 16.0f / 9.0f;
-  const int image_width = 400;
+  const int image_width = 800;
   const int image_height = static_cast<int>(image_width / aspect_ratio);
   // for antialiasing
-  const int sample_per_pixel = 10;
+  const int sample_per_pixel = 100;
   // for recursive ray tracing
-  const int recur_depth = 10;
+  const int recur_depth = 20;
 
   // Camera
   Camera* camera = new Camera;
@@ -94,16 +94,17 @@ int main() {
 
   Material* material1 = new Material;
   Material* material2 = new Material;
-  material2 -> emision = glm::vec3(0.0f, 0.0f, 0.0f);
+  material1 -> specular = glm::vec3(0.5f,0.5f,0.5f);
+  material2 -> ambient = glm::vec3(0.3f, 0.7f, 0.5f);
 
-  Sphere* sphere1 = new Sphere(glm::vec3(0.0f, 0.0f, -2.0f), 0.5f, material1);
+  Sphere* sphere1 = new Sphere(glm::vec3(1.0f, 0.0f, -2.0f), 0.5f, material1);
   Sphere* sphere2 = new Sphere(glm::vec3(0.0f, -100.5f, -3.0f), 100.0f, material2);
   world.add_obj(sphere2);
   world.add_obj(sphere1);
 
   Light* light1 = new Light;
   light1->color = glm::vec3(0.5f, 0.7f, 1.0f);
-  light1->position = glm::vec3(-0.5f, 1.2f, -2.0f);
+  // light1->position = glm::vec3(-0.5f, 1.2f, -2.0f);
   world.add_light(light1);
   // Light* light2 = new Light;
   // light2->position = glm::vec3(0.5f, 1.2f, -2.0f);
@@ -130,7 +131,8 @@ int main() {
           ray_color.push_back(world.findColor(&hitPoint, recur_depth));
         }
         pixel_color = std::accumulate(ray_color.begin(), ray_color.end(), decltype(ray_color)::value_type(0));
-        pixel_color = pixel_color * (1.0f / sample_per_pixel) ;
+        // Gamma Correction
+        pixel_color = sqrt(pixel_color * (1.0f / sample_per_pixel));
 
         // std::cerr << pixel_color.x << " "<< pixel_color.y << " " << pixel_color.z << "\n";
         write_color(std::cout, pixel_color);

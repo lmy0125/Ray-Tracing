@@ -25,6 +25,7 @@ class Scene: public Object {
     void clear() { objects.clear(); }
 
     virtual Intersection getIntersection(Ray* ray, float t_min, float t_max) override;
+    glm::vec3 lightIntersectColor (Light* light, Intersection* intersection, const int sample_per_light);
     glm::vec3 findColor(Intersection* intersection, int depth);
 };
 
@@ -67,6 +68,52 @@ glm::vec3 random_in_unit_sphere() {
     }
 }
 
+// get the color of a light source hitting an intersection
+glm::vec3 Scene::lightIntersectColor (Light* light, Intersection* intersection, const int sample_per_light){
+  // initialize color from this light source
+  glm::vec3 color = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    //soft shadow
+    //generate random samples in light area and average
+    for (int sample = 0; sample < sample_per_light; sample++){
+
+      // generate random point light in area light
+      glm::vec3 lightPos = light->position;
+      float x_adjust = random_float(-light->x_pad, light->x_pad);
+      float y_adjust = random_float(-light->y_pad, light->y_pad);
+      lightPos = lightPos + glm::vec3(x_adjust, y_adjust, 0);
+
+      //find the shadow ray -- ray from intersection point to light
+      glm::vec3 ori = intersection->pos;
+      glm::vec3 dir = glm::normalize(lightPos - ori);
+      Ray * shadowRay = new Ray(ori, dir);
+
+      //decide if shadow ray intersects with other objects in scene
+      Intersection shadowInt = getIntersection(shadowRay, 0, 0);
+
+      //if not in shadow, compute color from light
+      if (!shadowInt.onHit && !shadowInt.frontOnly) { 
+        glm::vec3 lj = glm::normalize(-intersection->pos + lightPos);
+        glm::vec3 n = glm::normalize(intersection->normal);
+        glm::vec3 hj = glm::normalize(lj + glm::normalize(intersection->dir));
+
+        glm::vec3 C = intersection->material->ambient;
+
+        C += intersection->material->diffuse * ((0<dot(n, lj))?dot(n, lj):0);
+
+        if (dot(n, hj) > 0) {
+          C += intersection->material->specular * pow(dot(n, hj), intersection->material->shininess);
+        }
+        
+        color += C * light->color;
+      }
+    }
+
+  //average
+  return (1/float(sample_per_light)) * color;
+}
+
+
 // given intersection, find the color from all light sources in scene
 glm::vec3 Scene::findColor(Intersection* intersection, int depth){
   // reach the end of the recursion
@@ -77,60 +124,29 @@ glm::vec3 Scene::findColor(Intersection* intersection, int depth){
   // if not hit, generate background color
   if (intersection->onHit == false) {
     float t = 0.5f * (intersection->dir.y + 1.0f);
-    glm::vec3 color = (1.0f-t)*glm::vec3(1.0f, 1.0f, 1.0f) + t*glm::vec3(0.5f, 0.7f, 1.0f);
-    color = glm::vec3(0.0f, 0.0f, 0.0f);
+    // glm::vec3 color = (1.0f-t)*glm::vec3(1.0f, 1.0f, 1.0f) + t*glm::vec3(0.5f, 0.7f, 1.0f);
+    glm::vec3 color = (1.0f-t)*glm::vec3(0.2f, 0.2, 0.2f);
     return color;
   }
 
-  // color on object hit
-  // glm::vec3 target = intersection->pos + intersection->normal + random_in_unit_sphere();
-  // Ray* ray2 = new Ray(intersection->pos, target - intersection->pos);
-  // Intersection intersection2 = this->getIntersection(ray2, 0.001f, std::numeric_limits<double>::infinity());
-  // return 0.5f * this->findColor(&intersection2, depth-1);
-
   glm::vec3 color = intersection->material->emision;
 
-  //iterate through all light sources
+  const int sample_per_light = 20;
+
+  // get color from all light sources
   for (Light* light : lights){
-    //find the shadow ray -- ray from intersection point to light
-    glm::vec3 ori = intersection->pos;
-    glm::vec3 dir = glm::normalize(light->position - ori);
-    Ray * shadowRay = new Ray(ori, dir);
-
-    //decide if shadow ray intersects with other objects in scene
-    Intersection shadowInt = getIntersection(shadowRay, 0, 0);
-
-    //if yes, skip this light source
-    // in shadow
-    if (shadowInt.onHit || shadowInt.frontOnly) { 
-    //  return glm::vec3(0, 1.0f, 0);
-    }
-
-    //otherwise, apply the shading formula and add to color
-    else{
-      //implement the formula
-      glm::vec3 lj = glm::normalize(-intersection->pos + light->position);
-      glm::vec3 n = glm::normalize(intersection->normal);
-      glm::vec3 hj = glm::normalize(lj + glm::normalize(intersection->dir));
-
-      glm::vec3 C = intersection->material->ambient;
-      // std::cerr << dot(n, lj) << "\n";
-      C += intersection->material->diffuse * ((0<dot(n, lj))?dot(n, lj):0);
-      if (dot(n, hj) > 0) {
-          C += intersection->material->specular * pow(dot(n, hj), intersection->material->shininess);
-      }
-      // C = glm::vec3(1.0f,1.0f,1.0f);
-      color += C * light->color;
-
-    }
-      glm::vec3 target = intersection->pos + intersection->normal + random_in_unit_sphere();
-      Ray* ray2 = new Ray(intersection->pos, target - intersection->pos);
-      Intersection intersection2 = this->getIntersection(ray2, 0, 0);
-      color += 0.5f * this->findColor(&intersection2, depth-1);
+    color += lightIntersectColor(light, intersection, sample_per_light);
   }
+
+  // recursive color
+  glm::vec3 target = intersection->pos + intersection->normal + random_in_unit_sphere();
+  Ray* ray2 = new Ray(intersection->pos, target - intersection->pos);
+  Intersection intersection2 = this->getIntersection(ray2, 0, 0);
+  color += 0.5f * this->findColor(&intersection2, depth-1);
 
   return color;
 }
+
 
 // Color FindColor( hit ){
 // Generate secondary rays to all lights

@@ -75,10 +75,10 @@ int main() {
 
   // Image
   const float aspect_ratio = 16.0f / 9.0f;
-  const int image_width = 800;
+  const int image_width = 1600;
   const int image_height = static_cast<int>(image_width / aspect_ratio);
   // for antialiasing
-  const int sample_per_pixel = 20;
+  const int sample_per_pixel = 100;
   // for recursive ray tracing
   const int recur_depth = 20;
 
@@ -95,9 +95,9 @@ int main() {
   Material* material1 = new Material;
   Material* material2 = new Material;
 
-  material1 -> specular = glm::vec3(0.5f,0.5f,0.5f);
+  material1 -> specular = glm::vec3(0.3f,0.3f,0.3f);
 
-  material2 -> ambient = glm::vec3(0.7f, 0.5f, 1.0f);
+  material2 -> ambient = glm::vec3(0.4f, 0.2f, 0.8f);
   material2 -> diffuse = glm::vec3(0.3f, 0.3f, 0.3f);
   material2 -> shininess = 2.0f;
 
@@ -110,7 +110,7 @@ int main() {
   world.add_obj(sphere3);
 
   Light* light1 = new Light;
-  light1->color = glm::vec3(0.5f, 0.7f, 1.0f);
+  light1->color = glm::vec3(1.0f, 1.0f, 0.7f);
   // light1->position = glm::vec3(-0.5f, 1.2f, -2.0f);
   world.add_light(light1);
   // Light* light2 = new Light;

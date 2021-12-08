@@ -91,6 +91,8 @@ glm::vec3 Scene::lightIntersectColor (Light* light, Intersection* intersection, 
       //decide if shadow ray intersects with other objects in scene
       Intersection shadowInt = getIntersection(shadowRay, 0, 0);
 
+      delete shadowRay;
+
       //if not in shadow, compute color from light
       if (!shadowInt.onHit && !shadowInt.frontOnly) { 
         glm::vec3 lj = glm::normalize(-intersection->pos + lightPos);
@@ -143,6 +145,7 @@ glm::vec3 Scene::findColor(Intersection* intersection, int depth){
   Ray* ray2 = new Ray(intersection->pos, target - intersection->pos);
   Intersection intersection2 = this->getIntersection(ray2, 0, 0);
   color += 0.5f * this->findColor(&intersection2, depth-1);
+  delete ray2;
 
   return color;
 }
